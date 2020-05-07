@@ -2,7 +2,17 @@ import sqlite3
 
 db = sqlite3.connect("contacts.sqlite")
 
-for row in db.execute("SELECT * FROM contacts"):
-    print(row)
+update_sql = "Update contacts set email = 'update@update.com'"
+update_cursor = db.cursor()
+update_cursor.execute(update_sql)
+print("{} rows were updated".format(update_cursor.rowcount))
+update_cursor.connection.commit()
+update_cursor.close()
+
+for name, phone, email in db.execute("SELECT * FROM contacts"):
+    print(name)
+    print(phone)
+    print(email)
+    print("=" * 20)
 
 db.close()
