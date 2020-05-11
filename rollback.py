@@ -1,30 +1,66 @@
+import sqlite3
+import pytz
+import datetime
+
+db = sqlite3.connect("accounts.sqlite")
+db.execute("CREATE table IF NOT EXISTS accounts (name text primary key not "
+           "null, balance integer not null)")
+db.execute("CREATE table if not exists transactions (time timestamp not "
+           "null, account text not null, amount integer not null, primary "
+           "key (time, account))")
+
+
 class Account:
 
-    def __init__(self, name: str, opening_balance: int = 0 ):
-        self.name = name
-        self._balance = opening_balance
-        print("Account created for {}".format(self.name), end ='')
+    @staticmethod
+    def _current_time():
+        return pytz.utc.localize(datetime.datetime.utcnow())
+
+    def __init__(self, name: str, opening_balance: int = 0):
+        cursor = db.execute("select name, balance from accounts where (name "
+                            "=?)", (name,))
+        row = cursor.fetchone()
+
+        if row:
+            self.name, self._balance = row
+            print("Retrieved record for {}. ".format(self.name), end='')
+        else:
+            self.name = name
+            self._balance = opening_balance
+            cursor.execute("Insert into accounts values(?, ?)", (name,
+                                                                 opening_balance))
+            cursor.connection.commit()
+            print("Account created for {}".format(self.name), end='')
         self.show_balance()
 
     def deposit(self, amount: int) -> float:
         if amount > 0:
-            self._balance += amount
+            self._save_update(amount)
             print("{:.2f} deposited".format(amount / 100))
         return self._balance
 
     def withdraw(self, amount: int) -> float:
         if 0 < amount <= self._balance:
-            self._balance -= amount
+            self._save_update(-amount)
             print("{:.2f} withdrawn".format(amount / 100))
-            return amount
+            return amount / 100
         else:
-            print("The amount must be greater than zero and less than your current balance")
-
+            print("The amount must be greater than zero and less than your "
+                  "current balance")
 
     def show_balance(self):
-        print("Balance on account {} is {:.2f}".format(self.name, self._balance /100))
+        print("Balance on account {} is {:.2f}".format(self.name,
+                                                       self._balance / 100))
 
-
+    def _save_update(self, amount):
+        new_balance = self._balance + amount
+        deposit_time = Account._current_time()
+        db.execute("update accounts set balance = ? where (name = ?)",
+                   (new_balance, self.name))
+        db.execute("insert into transactions values(?, ?, ?)",
+                   (deposit_time, self.name, amount))
+        db.commit()
+        self._balance = new_balance
 
 if __name__ == '__main__':
     john = Account("John")
@@ -34,4 +70,7 @@ if __name__ == '__main__':
     john.withdraw(30)
     john.withdraw(0)
     john.show_balance()
+    terry = Account("Terry")
+    Graham = Account("Graham", 9000)
+    Eric = Account("Eric", 7000)
 
