@@ -23,7 +23,11 @@
     <autoscroll-to-editor value="false" />
     <autoscroll-from-editor value="true" />
     <show-object-properties value="false" />
-    <loaded-nodes />
+    <loaded-nodes>
+      <connection connection-id="652e2e08-b98d-4ca9-9981-1c1ac647b50f">
+        <schema name="main" object-types="view, constraint, dataset trigger, column, index, table" />
+      </connection>
+    </loaded-nodes>
   </component>
   <component name="DBNavigator.Project.DatabaseConsoleManager">
     <connection id="652e2e08-b98d-4ca9-9981-1c1ac647b50f">
@@ -69,10 +73,10 @@
       <connection id="652e2e08-b98d-4ca9-9981-1c1ac647b50f" active="true">
         <database>
           <name value="Connection" />
-          <description value="" />
+          <description value="music.db" />
           <database-type value="SQLITE" />
           <config-type value="BASIC" />
-          <database-version value="9999.0" />
+          <database-version value="3.21" />
           <driver-source value="BUILTIN" />
           <driver-library value="" />
           <driver value="" />
@@ -81,7 +85,7 @@
           <port value="1234" />
           <database value="database" />
           <files>
-            <file path="sqlite.db" schema="main" />
+            <file path="$PROJECT_DIR$/music.db" schema="main" />
           </files>
           <type value="NONE" />
           <user value="" />
