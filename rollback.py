@@ -38,7 +38,7 @@ class Account:
             cursor.execute("Insert into accounts values(?, ?)", (name,
                                                                  opening_balance))
             cursor.connection.commit()
-            print("Account created for {}".format(self.name), end='')
+            print("Account created for {}. ".format(self.name), end='')
         self.show_balance()
 
     def deposit(self, amount: int) -> float:
@@ -63,12 +63,16 @@ class Account:
     def _save_update(self, amount):
         new_balance = self._balance + amount
         deposit_time = Account._current_time()
-        db.execute("update accounts set balance = ? where (name = ?)",
+        try:
+            db.execute("update accounts set balance = ? where (name = ?)",
                    (new_balance, self.name))
-        db.execute("insert into transactions values(?, ?, ?)",
+            db.execute("insert into transactions values(?, ?, ?)",
                    (deposit_time, self.name, amount))
-        db.commit()
-        self._balance = new_balance
+        except sqlite3.Error:
+            db.rollback()
+        else:
+            db.commit()
+            self._balance = new_balance
 
 if __name__ == '__main__':
     john = Account("John")

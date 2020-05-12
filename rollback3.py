@@ -1,13 +1,12 @@
 import sqlite3
 import pytz
 import datetime
-import pickle
 
 db = sqlite3.connect("accounts.sqlite", detect_types=sqlite3.PARSE_DECLTYPES)
 db.execute("CREATE table IF NOT EXISTS accounts (name text primary key not "
            "null, balance integer not null)")
 db.execute("CREATE table if not exists transactions (time timestamp not "
-           "null, zone INTEGER not null, account text not null, amount "
+           "null, account text not null, amount "
            "integer "
            "not null, primary "
            "key (time, account))")
@@ -23,10 +22,7 @@ class Account:
 
     @staticmethod
     def _current_time():
-        utc_time = pytz.utc.localize(datetime.datetime.utcnow())
-        local_time = utc_time.astimezone()
-        zone = local_time.tzinfo
-        return utc_time, zone
+        return pytz.utc.localize(datetime.datetime.utcnow())
 
     def __init__(self, name: str, opening_balance: int = 0):
         cursor = db.execute("select name, balance from accounts where (name "
@@ -42,7 +38,7 @@ class Account:
             cursor.execute("Insert into accounts values(?, ?)", (name,
                                                                  opening_balance))
             cursor.connection.commit()
-            print("Account created for {}".format(self.name), end='')
+            print("Account created for {}. ".format(self.name), end='')
         self.show_balance()
 
     def deposit(self, amount: int) -> float:
@@ -66,12 +62,11 @@ class Account:
 
     def _save_update(self, amount):
         new_balance = self._balance + amount
-        deposit_time, zone = Account._current_time()
-        pickled_zone = pickle.dumps(zone)
+        deposit_time = Account._current_time()
         db.execute("update accounts set balance = ? where (name = ?)",
                    (new_balance, self.name))
-        db.execute("insert into transactions values(?, ?, ?, ?)",
-                   (deposit_time, pickled_zone, self.name, amount))
+        db.execute("insert into transactions values(?, ?, ?)",
+                   (deposit_time, self.name, amount))
         db.commit()
         self._balance = new_balance
 
