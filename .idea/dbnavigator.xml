@@ -31,7 +31,7 @@
   </component>
   <component name="DBNavigator.Project.DatabaseConsoleManager">
     <connection id="652e2e08-b98d-4ca9-9981-1c1ac647b50f">
-      <console name="Connection" type="STANDARD" schema="" session="Main" />
+      <console name="Connection" type="STANDARD" schema="" session="Main"><![CDATA[select artists._id, artists.name, albums.name from artists inner join albums on albums.artist = artists._id where albums.name in (select albums.name from albums group by albums.name having count(albums.name) > 1) order by albums.name, artists.name]]></console>
     </connection>
     <connection id="c6ca3cd2-9ef1-4e03-afae-e345402eb6c3">
       <console name="Connection 1" type="STANDARD" schema="" session="Main" />
